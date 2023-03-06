@@ -77,7 +77,7 @@ async function startSetup() {
 
   console.log(`rendering: ${canvasWidth} x ${canvasHeight}`);
   mainCanvas = createGraphics(originCanvasWidth, originCanvasHeight);
-  mainCanvas.pixelDensity = canvasDensity;
+  mainCanvas.pixelDensity(int(canvasDensity));
 
   canvasWidth = originCanvasWidth;
   canvasHeight = originCanvasHeight;
