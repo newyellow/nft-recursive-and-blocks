@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Recursive and Blocks Generator</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            background-color: #333;
+
+            color: #FFF;
+
+            height: 100vh;
+            font-size: small;
+            font-family: '微軟正黑體', 'Courier New', Courier, monospace;
+
+        }
+
+        #settings-panel {
+            width: 100%;
+            height: 100%;
+
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+
+            overflow-y: scroll;
+
+            padding: 30px;
+
+            background-color: #111;
+            color: #FFF;
+
+            font-family: '微軟正黑體', 'Courier New', Courier, monospace;
+        }
+
+        #override-settings {
+            width: 100%;
+            max-width: 600px;
+
+            padding: 20px 10px;
+            border-radius: 30px;
+            border-width: 6px;
+            border-style: solid;
+        }
+
+        #override-settings .option-label {
+            margin-left: 16px;
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .override-feature {
+            padding: 12px;
+            border-radius: 6px;
+            /* border: 1px solid #FFF; */
+            background-color: #111;
+            color: #FFF;
+        }
+
+        .feature-options {
+            padding: 10px;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: left;
+            align-items: center;
+        }
+
+        .feature-button {
+            width: 60px;
+            height: 60px;
+            padding: 6px;
+            margin: 6px;
+            box-sizing: border-box;
+            border-radius: 6px;
+            border: 1px solid #FFF;
+            background-color: #111;
+            color: #FFF;
+            text-align: center;
+            cursor: pointer;
+
+            font-size: 1.2em;
+        }
+
+        .active {
+            filter: invert();
+        }
+    </style>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+        crossorigin="anonymous"></script>
+
+    <!-- jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+
+<body>
+    <div id="settings-panel">
+
+        <div id="override-settings">
+
+            <!-- Background Color -->
+            <div class="override-feature" id="override-set-background_color">
+
+                <label class="option-label">背景色<span class="current-option">：隨機</span></label>
+
+                <div class="feature-options">
+                    <div class="feature-button">隨機</div>
+                    <div class="feature-button">深色</div>
+                    <div class="feature-button">淺色</div>
+                </div>
+
+            </div>
+
+            <!-- Layout -->
+            <div class="override-feature" id="override-set-layout">
+
+                <label class="option-label">形狀布局<span class="current-option">：隨機</span></label>
+
+                <div class="feature-options">
+                    <div class="feature-button">隨機</div>
+                    <div class="feature-button">1:1</div>
+                    <div class="feature-button">3:4</div>
+                    <div class="feature-button">9:16</div>
+                    <div class="feature-button">4:3</div>
+                    <div class="feature-button">16:9</div>
+                </div>
+
+            </div>
+
+            <!-- Color Hue -->
+            <div class="override-feature" id="override-set-main_color">
+
+                <label class="option-label">主色調<span class="current-option">：隨機</span></label>
+
+                <div class="feature-options">
+                    <div class="feature-button">隨機</div>
+                    <div class="feature-button">紅</div>
+                    <div class="feature-button">橙</div>
+                    <div class="feature-button">黃</div>
+                    <div class="feature-button">綠</div>
+                    <div class="feature-button">藍</div>
+                    <div class="feature-button">靛</div>
+                    <div class="feature-button">紫</div>
+                </div>
+
+            </div>
+
+            <!-- Color Type -->
+            <div class="override-feature" id="override-set-color_type">
+
+                <label class="option-label">顏色類型<span class="current-option">：隨機</span></label>
+
+                <div class="feature-options">
+                    <div class="feature-button">隨機</div>
+                    <div class="feature-button">協調色 +60</div>
+                    <div class="feature-button">協調色 -60</div>
+                    <div class="feature-button">對比色</div>
+                    <div class="feature-button">黑白</div>
+                </div>
+
+            </div>
+
+            <!-- Triangle Chance -->
+            <div class="override-feature" id="override-set-triangle_chance">
+
+                <label class="option-label">三角形機率<span class="current-option">：隨機</span></label>
+
+                <div class="feature-options">
+                    <div class="feature-button">隨機</div>
+                    <div class="feature-button">無機率</div>
+                    <div class="feature-button">低機率</div>
+                    <div class="feature-button">中機率</div>
+                    <div class="feature-button">高機率</div>
+                </div>
+
+            </div>
+
+            <!-- Paper Texture -->
+            <div class="override-feature" id="override-set-paper_texture">
+
+                <label class="option-label">背景材質紋理<span class="current-option">：隨機</span></label>
+
+                <div class="feature-options">
+                    <div class="feature-button">隨機</div>
+                    <div class="feature-button">無紋理</div>
+                    <div class="feature-button">直線條</div>
+                    <div class="feature-button">橫線條</div>
+                </div>
+
+            </div>
+
+
+
+            <div class="row">
+                <div class="col-auto">
+                    <button type="button" class="btn btn-primary mb-3" onclick="SendData()">Re-generate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        let userId = '';
+        let userColor = '#ffffff';
+        let setDatas = [];
+
+        $(window).on('load', function () {
+            // get user data
+            loadUserSettings();
+
+            setupOverridingSet('override-set-background_color');
+            setupOverridingSet('override-set-layout');
+            setupOverridingSet('override-set-main_color');
+            setupOverridingSet('override-set-color_type');
+            setupOverridingSet('override-set-triangle_chance');
+            setupOverridingSet('override-set-paper_texture');
+
+            $('#override-settings').css('border-color', userColor);
+        });
+
+        function setupOverridingSet(targetSetId) {
+            let setDiv = $(`#${targetSetId}`);
+
+            let buttons = setDiv.find('.feature-button');
+            $(buttons).each(function (index, button) {
+                $(button).on('click', function () {
+                    $(`#${targetSetId} .current-option`).text(`：${$(this).text()}`);
+
+                    setDatas[targetSetId] = {
+                        'pickedIndex': index
+                    };
+
+                    console.log(setDatas);
+
+                    setupSetButtonStatus(targetSetId);
+                    saveUserSettings();
+                });
+            });
+
+            // setup default status
+            if (!setDatas[targetSetId]) {
+                setDatas[targetSetId] = {
+                    'pickedIndex': 0
+                };
+            }
+
+            // reset button status
+            setupSetButtonStatus(targetSetId);
+        }
+
+        function setupSetButtonStatus(targetSetId) {
+            let currentPickedIndex = setDatas[targetSetId].pickedIndex;
+
+            let setDiv = $(`#${targetSetId}`);
+            let buttons = setDiv.find('.feature-button');
+            $(buttons).each(function (index, button) {
+                $(button).removeClass('active');
+                if (index == currentPickedIndex) {
+                    $(button).addClass('active');
+                }
+            });
+        }
+
+        function loadUserSettings() {
+            let data = localStorage.getItem('userData');
+            if (data) {
+                data = JSON.parse(data);
+
+                userId = data.userId;
+                userColor = data.userColor;
+
+                if(userId == '')
+                {
+                    GetUserID();
+                    saveUserSettings();
+                }
+            }
+            else // not exist yet
+            {
+                GetUserID();
+                saveUserSettings();
+            }
+        }
+
+        function saveUserSettings() {
+
+            let data = {
+                'userId': userId,
+                'userColor': userColor,
+            };
+
+            console.log("save user data");
+            console.log(data);
+            console.log(JSON.stringify(data));
+
+            // save data in the local storage
+            localStorage.setItem('userData', JSON.stringify(data));
+
+            console.log("save data");
+            console.log(data);
+        }
+
+        function GetUserID() {
+            let url = "../api/";
+            let data = {
+                "action": "get_user_id"
+            };
+
+            $.post(url, data, function (response) {
+                console.log(response);
+
+                let jsonData = JSON.parse(response);
+
+                userId = jsonData.user_id;
+                userColor = jsonData.user_color;
+            });
+        }
+
+        function SendData() {
+            let url = "../api/";
+            let data = {
+                "action": "submit_generation",
+                "user_id": userId,
+                "user_color": userColor,
+                "data": {
+                    "background_color": setDatas['override-set-background_color'].pickedIndex,
+                    "layout": setDatas['override-set-layout'].pickedIndex,
+                    "main_color": setDatas['override-set-main_color'].pickedIndex,
+                    "color_type": setDatas['override-set-color_type'].pickedIndex,
+                    "triangle_chance": setDatas['override-set-triangle_chance'].pickedIndex,
+                    "paper_texture": setDatas['override-set-paper_texture'].pickedIndex,
+                }
+            };
+
+            $.post(url, data, function (response) {
+                console.log(response);
+            });
+        }
+
+        $(window).on('keydown', function (e) {
+            if (e.key == 'r') {
+                localStorage.removeItem('userData');
+                console.log('item removed');
+            }
+        });
+    </script>
+
+</body>
+
+</html>
