@@ -24,7 +24,6 @@
 
         #settings-panel {
             width: 100%;
-            height: 100%;
 
             display: flex;
             flex-direction: row;
@@ -167,6 +166,7 @@
                     <div class="feature-button">協調色 -60</div>
                     <div class="feature-button">對比色</div>
                     <div class="feature-button">黑白</div>
+                    <div class="feature-button">彩虹</div>
                 </div>
 
             </div>
@@ -187,7 +187,7 @@
             </div>
 
             <!-- Paper Texture -->
-            <div class="override-feature" id="override-set-paper_texture">
+            <div class="override-feature" id="override-set-paper_texture" style="display: none;">
 
                 <label class="option-label">背景材質紋理<span class="current-option">：隨機</span></label>
 
@@ -208,17 +208,35 @@
                 </div>
             </div>
         </div>
+        <!-- <div id="test-colors">
+        </div> -->
     </div>
 
     <script>
+        const API_URL = 'http://newyellow.idv.tw/projects/recursive-and-blocks/api/';
 
         let userId = '';
         let userColor = '#ffffff';
         let setDatas = [];
 
         $(window).on('load', function () {
+            startSequence();
+
+            // test colors
+            // for(let i=0; i< 100; i++)
+            // {
+            //     let newDiv = $('<div></div>');
+            //     newDiv.css('background-color', getColorByUserId(i));
+            //     newDiv.css('width', '200px');
+            //     newDiv.css('height', '30px');
+
+            //     $('#test-colors').append(newDiv);
+            // }
+        });
+
+        async function startSequence() {
             // get user data
-            loadUserSettings();
+            await loadUserSettings();
 
             setupOverridingSet('override-set-background_color');
             setupOverridingSet('override-set-layout');
@@ -227,8 +245,9 @@
             setupOverridingSet('override-set-triangle_chance');
             setupOverridingSet('override-set-paper_texture');
 
+            console.log("setup user color: " + userColor);
             $('#override-settings').css('border-color', userColor);
-        });
+        }
 
         function setupOverridingSet(targetSetId) {
             let setDiv = $(`#${targetSetId}`);
@@ -242,7 +261,7 @@
                         'pickedIndex': index
                     };
 
-                    console.log(setDatas);
+                    // console.log(setDatas);
 
                     setupSetButtonStatus(targetSetId);
                     saveUserSettings();
@@ -273,80 +292,105 @@
             });
         }
 
-        function loadUserSettings() {
+        async function loadUserSettings() {
             let data = localStorage.getItem('userData');
-            if (data) {
-                data = JSON.parse(data);
+            if (data && data.includes('userId')) {
+                console.log("User Storage Data Exist, Loading data");
+                console.log(data);
 
-                userId = data.userId;
-                userColor = data.userColor;
+                let dataJson = JSON.parse(data);
 
-                if(userId == '')
-                {
-                    GetUserID();
+                userId = dataJson.userId;
+
+                if (userId == '' || userId == undefined) {
+                    await GetUserID();
                     saveUserSettings();
                 }
             }
             else // not exist yet
             {
-                GetUserID();
+                console.log("User Storage Data Not Exist, Grabbing new Data");
+                await GetUserID();
                 saveUserSettings();
             }
+
+            userColor = getColorByUserId(userId);
         }
 
         function saveUserSettings() {
 
             let data = {
-                'userId': userId,
-                'userColor': userColor,
+                'userId': userId
             };
-
-            console.log("save user data");
-            console.log(data);
-            console.log(JSON.stringify(data));
 
             // save data in the local storage
             localStorage.setItem('userData', JSON.stringify(data));
-
-            console.log("save data");
-            console.log(data);
         }
 
-        function GetUserID() {
-            let url = "../api/";
+        async function GetUserID() {
+            let url = API_URL;
             let data = {
                 "action": "get_user_id"
             };
+            let postBody = Object.entries(data).map(([k, v]) => { return k + '=' + v }).join('&');
 
-            $.post(url, data, function (response) {
-                console.log(response);
-
-                let jsonData = JSON.parse(response);
-
-                userId = jsonData.user_id;
-                userColor = jsonData.user_color;
+            let result = await fetch(url, {
+                method: 'POST',
+                body: postBody,
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
             });
+
+            let jsonData = await result.json();
+            console.log("finish get userID:");
+            console.log(jsonData);
+
+            userId = jsonData.user_id;
         }
 
-        function SendData() {
-            let url = "../api/";
+        async function SendData() {
+            let url = API_URL;
+
+            let settingData = {
+                "background_color": setDatas['override-set-background_color'].pickedIndex,
+                "layout": setDatas['override-set-layout'].pickedIndex,
+                "main_color": setDatas['override-set-main_color'].pickedIndex,
+                "color_type": setDatas['override-set-color_type'].pickedIndex,
+                "triangle_chance": setDatas['override-set-triangle_chance'].pickedIndex,
+                "paper_texture": setDatas['override-set-paper_texture'].pickedIndex
+            };
+
             let data = {
                 "action": "submit_generation",
                 "user_id": userId,
                 "user_color": userColor,
-                "data": {
-                    "background_color": setDatas['override-set-background_color'].pickedIndex,
-                    "layout": setDatas['override-set-layout'].pickedIndex,
-                    "main_color": setDatas['override-set-main_color'].pickedIndex,
-                    "color_type": setDatas['override-set-color_type'].pickedIndex,
-                    "triangle_chance": setDatas['override-set-triangle_chance'].pickedIndex,
-                    "paper_texture": setDatas['override-set-paper_texture'].pickedIndex,
-                }
+                "data": JSON.stringify(settingData)
             };
 
-            $.post(url, data, function (response) {
-                console.log(response);
+            let postBody = Object.entries(data).map(([k, v]) => { return k + '=' + v }).join('&');
+            console.log("SEND DATA:");
+            console.log(postBody);
+
+            let result = await fetch(url, {
+                method: 'POST',
+                body: postBody,
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
             });
+
+            let jsonData = await result.json();
+            console.log(jsonData);
+            if (jsonData.status == true) {
+                console.log("Send Data OK");
+            }
+            else {
+                console.log(`Send Data Fail: ${jsonData.message}`);
+            }
+
         }
 
         $(window).on('keydown', function (e) {
@@ -355,6 +399,75 @@
                 console.log('item removed');
             }
         });
+
+        function getColorByUserId(userId) {
+            // let hueOrder = [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 240, 255, 270, 285, 300, 315, 330, 345];
+            let hueOrder = [0, 45, 90, 135, 180, 225, 270, 315, 15, 60, 105, 150, 195, 240, 285, 330, 30, 75, 120, 165, 210, 255, 300, 345];
+            let hueValue = hueOrder[userId % 24];
+
+            if (userId % 4 == 0) {
+                satValue = 0.3;
+                briValue = 1.0;
+            }
+            else if (userId % 4 == 1) {
+                satValue = 0.8;
+                briValue = 1.0;
+            }
+            else if (userId % 4 == 2) {
+                satValue = 0.3;
+                briValue = 1.0;
+            }
+            else if (userId % 4 == 3) {
+                satValue = 0.8;
+                briValue = 1.0;
+            }
+
+            return HsbToHtmlColor(hueValue, satValue, briValue);
+        }
+
+        function HsbToHtmlColor(hueValue, satValue, briValue) {
+            let chroma = briValue * satValue;
+            let huePrime = hueValue / 60;
+            let x = chroma * (1 - Math.abs(huePrime % 2 - 1));
+            let m = briValue - chroma;
+
+            if (huePrime < 1) {
+                red = chroma;
+                green = x;
+                blue = 0;
+            }
+            else if (huePrime < 2) {
+                red = x;
+                green = chroma;
+                blue = 0;
+            }
+            else if (huePrime < 3) {
+                red = 0;
+                green = chroma;
+                blue = x;
+            }
+            else if (huePrime < 4) {
+                red = 0;
+                green = x;
+                blue = chroma;
+            }
+            else if (huePrime < 5) {
+                red = x;
+                green = 0;
+                blue = chroma;
+            }
+            else {
+                red = chroma;
+                green = 0;
+                blue = x;
+            }
+
+            let redPart = Math.round((red + m) * 255);
+            let greenPart = Math.round((green + m) * 255);
+            let bluePart = Math.round((blue + m) * 255);
+
+            return `rgb(${redPart}, ${greenPart}, ${bluePart})`;
+        }
     </script>
 
 </body>

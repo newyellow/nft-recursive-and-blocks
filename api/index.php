@@ -2,11 +2,15 @@
 
 date_default_timezone_set("Asia/Taipei");
 
+// handle CORS
+handleCORS();
+
 // handle any post data
 handlePostData();
 
 
 function handlePostData() {
+
     // check if there is any post data
     if (empty($_POST))
         exit;
@@ -48,6 +52,30 @@ function handlePostData() {
     }
 }
 
+function handleCORS () {
+    // Allow from any origin
+    if (isset($_SERVER['HTTP_ORIGIN'])) {
+        // Decide if the origin in $_SERVER['HTTP_ORIGIN'] is one
+        // you want to allow, and if so:
+        header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+        header('Access-Control-Allow-Credentials: true');
+        header('Access-Control-Max-Age: 86400');    // cache for 1 day
+    }
+    
+    // Access-Control headers are received during OPTIONS requests
+    if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+        
+        if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
+            // may also be using PUT, PATCH, HEAD etc
+            header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+        
+        if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+            header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+    
+        exit(0);
+    }
+}
+
 
 function getConn() {
     $host = 'localhost'; // assuming the database is hosted on the same server
@@ -70,6 +98,8 @@ function insertData($userId, $data) {
     // get the database connection
     $conn = getConn();
 
+    $inputSettingData = $data;
+
     // prepare the SQL statement
     $ipAddress = $_SERVER['REMOTE_ADDR'];
     $currentTime = date("Y-m-d H:i:s");
@@ -80,10 +110,7 @@ function insertData($userId, $data) {
     $stmt = mysqli_prepare($conn, $sql);
 
     // bind the parameters
-    mysqli_stmt_bind_param($stmt, "ssss", $userId, $ipAddress, $currentTime, $jsonData);
-
-    // encode the data as JSON
-    $jsonData = json_encode($data);
+    mysqli_stmt_bind_param($stmt, "ssss", $userId, $ipAddress, $currentTime, $inputSettingData);
 
     // execute the statement
     $result = mysqli_stmt_execute($stmt);
@@ -98,10 +125,14 @@ function insertData($userId, $data) {
     mysqli_close($conn);
 
     if($result) {
-        echo "Data inserted successfully";
+        $resultData["status"] = true;
+        $resultData["message"] = "Data inserted successfully";
     } else {
-        echo "Error inserting data";
+        $resultData["status"] = false;
+        $resultData["message"] = "Error inserting data";
     }
+
+    echo json_encode($resultData);
 }
 
 function getUnviewedData() {
@@ -199,20 +230,37 @@ function getNextUserId() {
     $conn = getConn();
     
     // prepare and execute SQL statement to get the highest user_id
-    $query = "SELECT MAX(user_id) FROM remote_data";
+    $query = "SELECT MAX(user_id) FROM user_ids";
     $result = $conn->query($query);
     $row = $result->fetch_assoc();
-    
-    // close database connection
-    $conn->close();
+
+    $newUserId = 0;
     
     // if no data found, return 0
     if ($row['MAX(user_id)'] == null) {
-        return 0;
+        $newUserId = 0;
     }
-    
+    else {
+        $newUserId = $row['MAX(user_id)'] + 1;
+    }
+
+    // prepare data for inserting
+    $ipAddress = $_SERVER['REMOTE_ADDR'];
+    $currentTime = date("Y-m-d H:i:s");
+
+    // insert new user id
+    $insertSql = "INSERT INTO user_ids (user_id, ip_address, create_time) VALUES (?, ?, ?)";
+    $stmt = mysqli_prepare($conn, $insertSql);
+    mysqli_stmt_bind_param($stmt, "iss", $newUserId, $ipAddress, $currentTime);
+
+    // execute the statement
+    $result = mysqli_stmt_execute($stmt);
+
+    // close database connection
+    $conn->close();
+
     // return the next available user_id
-    return $row['MAX(user_id)'] + 1;
+    return $newUserId;
 }
 
 function getUserColor ($userId) {
