@@ -12,7 +12,6 @@ let gridW = 0;
 let gridH = 0;
 // traits
 
-let mainCanvas;
 let originCanvasWidth = 1920;
 let originCanvasHeight = 1080;
 
@@ -49,6 +48,9 @@ let lineColorNoiseMap;
 let paddingW = 300;
 let paddingH = 100;
 let layoutRatio = 1.0;
+
+// image noise texture thing
+let isNoiseTextureReady = false;
 
 // this only happened once
 async function setup() {
@@ -90,16 +92,12 @@ async function startSetup() {
 
   // setup canvas
   createCanvas(windowWidth, windowHeight);
+  pixelDensity(1);
+
+  canvasWidth = windowWidth;
+  canvasHeight = windowHeight;
   originCanvasWidth = windowWidth;
   originCanvasHeight = windowHeight;
-
-  // console.log(`rendering: ${canvasWidth} x ${canvasHeight}`);
-  mainCanvas = createGraphics(originCanvasWidth, originCanvasHeight);
-  mainCanvas.pixelDensity(1);
-
-  canvasWidth = originCanvasWidth;
-  canvasHeight = originCanvasHeight;
-
 
   // setup lines color
   baseSat = fxRandom(40, 80);
@@ -123,12 +121,14 @@ async function startSetup() {
 
   paperColor = color(paperHue, 0, paperLightness);
 
-  mainCanvas.background(paperColor);
+  background(paperColor);
 
 
 
   splitChance = 0.3;
-  //await NYRandomTextureLines();
+
+  await NYNoiseTextureImage ();
+  // await NYRandomTextureLines();
   await startDraw();
 
 
@@ -371,9 +371,9 @@ async function NYTriangle(drawX, drawY, drawWidth, drawHeight, triangleType) {
 }
 
 function NYLine(p1x, p1y, p2x, p2y, targetColor) {
-  mainCanvas.colorMode(HSB);
-  mainCanvas.blendMode(BLEND);
-  mainCanvas.noStroke();
+  colorMode(HSB);
+  blendMode(BLEND);
+  noStroke();
   colorMode(HSB);
   let _hue = hue(targetColor);
   let _sat = saturation(targetColor);
@@ -400,12 +400,41 @@ function NYLine(p1x, p1y, p2x, p2y, targetColor) {
     let drawWidth = dotWidth * (0.1 + noiseValue * 0.5);
 
     targetColor.setAlpha(0.66);
-    mainCanvas.fill(targetColor);
-    mainCanvas.circle(drawX, drawY, drawWidth, drawWidth);
+    fill(targetColor);
+    circle(drawX, drawY, drawWidth, drawWidth);
   }
 }
 
+async function NYNoiseTextureImage () {
+  isNoiseTextureReady = false;
+
+  let randomIndex = int(fxRandom(0, 20)) + 1;
+  let randomIndexStr = randomIndex.toString();
+  if(randomIndex < 10)
+    randomIndexStr = '0' + randomIndexStr;
+
+  let textureName = '';
+
+  if(isDarkPaper)
+    textureName += `paper-dark-${randomIndexStr}.png`;
+  else
+    textureName += `paper-light-${randomIndexStr}.png`;
+
+  loadImage('images/' + textureName, img => {
+    image(img, 0, 0, windowWidth, windowHeight);
+    isNoiseTextureReady = true;
+  });
+
+  while(!isNoiseTextureReady) {
+    await sleep(10);
+  }
+}
 async function NYRandomTextureLines() {
+
+  let noiseCanvas = createGraphics(1920, 1080);
+  noiseCanvas.pixelDensity(1);
+
+  isDarkPaper = true;
 
   let xLines = 200;
   let yLines = 300;
@@ -423,32 +452,38 @@ async function NYRandomTextureLines() {
   let noiseMap = new NYNoiseMap(noiseScaleX, noiseScaleY);
   let colorNoiseMap = new NYNoiseMap(noiseScaleX, noiseScaleY);
 
-  let xSpace = float(canvasWidth) / float(xLines);
-  let ySpace = float(canvasHeight) / float(yLines);
+  let xSpace = float(1920) / float(xLines);
+  let ySpace = float(1080) / float(yLines);
 
-  mainCanvas.colorMode(HSB);
+  noiseCanvas.colorMode(HSB);
   colorMode(HSB);
 
   let lineColor = color('white');
 
   if (isDarkPaper)
-    lineColor = color(0, 0, 0);
+  {
+    noiseCanvas.background(0, 0, 6);
+    lineColor = color(0, 0, 90);
+  }
   else
+  {
+    noiseCanvas.background(0, 0, 90);
     lineColor = color(0, 0, 30);
+  }
 
-  if (SETTING_NO_TEXTURE)
-    return;
+  // if (SETTING_NO_TEXTURE)
+  //   return;
 
-  if (overrideTextureColor != 'none')
-    lineColor = color(overrideTextureColor);
+  // if (overrideTextureColor != 'none')
+  //   lineColor = color(overrideTextureColor);
 
-  if (brightness(lineColor) > brightness(paperColor))
-    mainCanvas.blendMode(ADD);
+  if (isDarkPaper)
+    noiseCanvas.blendMode(ADD);
   else
-    mainCanvas.blendMode(MULTIPLY);
+    noiseCanvas.blendMode(MULTIPLY);
 
-  mainCanvas.stroke(lineColor);
-  mainCanvas.strokeWeight(6 * scaler);
+  noiseCanvas.stroke(lineColor);
+  noiseCanvas.strokeWeight(6 * scaler);
 
   let lineAlpha = 0.1;
 
@@ -459,7 +494,7 @@ async function NYRandomTextureLines() {
     for (let x = 0; x < xLines; x++) {
       let lineX = (0.5 + x) * xSpace;
 
-      for (let i = 0; i <= canvasHeight; i++) {
+      for (let i = 0; i <= 1080; i++) {
         let pointY = i;
         let pointX = lineX + (noiseMap.getNoise(x / scaler, i / scaler) - 0.5) * xSpace;
 
@@ -467,8 +502,8 @@ async function NYRandomTextureLines() {
           continue;
 
         lineColor.setAlpha(colorNoiseMap.getNoise(x / scaler, i / scaler) * lineAlpha * random());
-        mainCanvas.stroke(lineColor);
-        mainCanvas.point(pointX, pointY);
+        noiseCanvas.stroke(lineColor);
+        noiseCanvas.point(pointX, pointY);
       }
 
       if (x % 3 == 0)
@@ -479,7 +514,7 @@ async function NYRandomTextureLines() {
     for (let y = 0; y < yLines; y++) {
       let lineY = (0.5 + y) * ySpace;
 
-      for (let i = 0; i <= canvasWidth; i++) {
+      for (let i = 0; i <= 1920; i++) {
         let pointX = i;
         let pointY = lineY + (noiseMap.getNoise(i / scaler, y / scaler) - 0.5) * ySpace;
 
@@ -487,14 +522,18 @@ async function NYRandomTextureLines() {
           continue;
 
         lineColor.setAlpha(colorNoiseMap.getNoise(i / scaler, y / scaler) * 0.1 * random());
-        mainCanvas.stroke(lineColor);
-        mainCanvas.point(pointX, pointY);
+        noiseCanvas.stroke(lineColor);
+        noiseCanvas.point(pointX, pointY);
       }
 
       if (y % 3 == 0)
         await sleep(1);
     }
   }
+
+  // finish draw texture
+  let textureName = 'noise-tex-' + fxhash + '.png';
+  save(noiseCanvas, textureName);
 }
 
 let rainbowIndexColor = 0;
@@ -567,15 +606,6 @@ class NYNoiseMap {
     this.mapY += y * this.scaleY;
 
     return noise(this.mapX, this.mapY);
-  }
-}
-
-function draw() {
-  if (mainCanvas != null) {
-
-    blendMode(BLEND);
-    background(10);
-    image(mainCanvas, 0, 0, width, height);
   }
 }
 
