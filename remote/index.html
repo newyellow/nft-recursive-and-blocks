@@ -119,7 +119,7 @@
           RegenerateImg(overrideSettings);
 
           while (isDrawing) {
-            console.log("still in hanging");
+            // console.log("still in hanging");
             await sleep(100);
           }
 
@@ -131,6 +131,11 @@
             emptyCounter = 0;
             $('#nft-display').css('border-color', `#000`);
             RegenerateImg(null);
+
+            while (isDrawing) {
+              // console.log("still in hanging");
+              await sleep(100);
+            }
           }
         }
       }
