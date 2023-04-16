@@ -46,6 +46,7 @@
     body {
       margin: 0;
       padding: 0;
+      border: 0px;
 
       background-color: #333;
 
@@ -57,15 +58,14 @@
       width: 100%;
       height: 100%;
 
-      border-style: solid !important;
-      border-width: 24px !important;
-      border-color: #a00;
+      border-style: solid;
+      border-width: 24px;
+      border-color: #000;
 
       box-sizing: border-box;
 
       background-color: 666;
       padding: 0px;
-      border: 0px;
       margin: 0px;
 
       overflow: hidden;
@@ -90,8 +90,10 @@
   <script>
 
     const API_URL = 'http://newyellow.idv.tw/projects/recursive-and-blocks/api/';
+
+    let remotePlayQueue = [];
+
     let userOverrideSettings = {};
-    let hasData = false;
     let emptyCounter = 0;
 
     let isDrawing = false;
@@ -103,28 +105,30 @@
 
         await sleep(3000);
 
-        if (hasData) {
+        if (remotePlayQueue.length > 0) {
           emptyCounter = 0;
 
-          let newSettings = GetOverrideSettings();
-          console.log(newSettings);
-          RegenerateImg(GetOverrideSettings());
+          let playData = remotePlayQueue.shift();
 
-          while(isDrawing)
-          {
+          // change color
+          $('#nft-display').css('border-color', getColorByUserId(playData.user_id));
+
+          console.log(`play data [${playData.id}] by user [${playData.user_id}]: ${JSON.stringify(playData)}`);
+          let overrideSettings = GetOverrideSettings(playData.feature_data);
+          RegenerateImg(overrideSettings);
+
+          while (isDrawing) {
             console.log("still in hanging");
             await sleep(100);
           }
 
           await sleep(2000);
         }
-        else
-        {
+        else {
           emptyCounter++;
-          if(emptyCounter >= 10)
-          {
+          if (emptyCounter >= 10) {
             emptyCounter = 0;
-            $('#nft-display').css('border-color', `24px solid`);
+            $('#nft-display').css('border-color', `#000`);
             RegenerateImg(null);
           }
         }
@@ -168,11 +172,15 @@
         console.log(`id: ${id}, user_id: ${user_id}, ip_address: ${ip_address}, timestamp: ${timestamp}`);
         console.log(feature_data);
 
-        // set target color
-        $('#nft-display').css('border-color', getColorByUserId(user_id));
-
         userOverrideSettings = feature_data;
-        hasData = true;
+
+        remotePlayQueue.push({
+          "play_id": id,
+          "user_id": user_id,
+          "ip_address": ip_address,
+          "timestamp": timestamp,
+          "feature_data": feature_data
+        });
       }
     }
 
@@ -182,7 +190,6 @@
     }
 
     function RegenerateImg(settingData) {
-      hasData = false;
       isDrawing = true;
       document.getElementById('nft-iframe').contentWindow.RedrawArtifact(settingData);
     }
@@ -195,7 +202,7 @@
       isDrawing = false;
     }
 
-    function GetOverrideSettings() {
+    function GetOverrideSettings(inputFeatureSettings) {
       // "background_color": setDatas['override-set-background_color'].pickedIndex,
       // "layout": setDatas['override-set-layout'].pickedIndex,
       // "main_color": setDatas['override-set-main_color'].pickedIndex,
@@ -209,58 +216,58 @@
       resultSettings.inputHeight = 1080;
       resultSettings.inputDensity = 1;
 
-      if(userOverrideSettings["layout"] == 0)
+      if (inputFeatureSettings["layout"] == 0)
         resultSettings.layoutRatio = 0.3 + Math.random() * 1.5;
-      else if(userOverrideSettings["layout"] == 1)
+      else if (inputFeatureSettings["layout"] == 1)
         resultSettings.layoutRatio = 1;
-      else if(userOverrideSettings["layout"] == 2)
+      else if (inputFeatureSettings["layout"] == 2)
         resultSettings.layoutRatio = 0.75;
-      else if(userOverrideSettings["layout"] == 3)
+      else if (inputFeatureSettings["layout"] == 3)
         resultSettings.layoutRatio = 0.5625;
-      else if(userOverrideSettings["layout"] == 4)
+      else if (inputFeatureSettings["layout"] == 4)
         resultSettings.layoutRatio = 1.3333;
-      else if(userOverrideSettings["layout"] == 5)
+      else if (inputFeatureSettings["layout"] == 5)
         resultSettings.layoutRatio = 1.7778;
 
-      if (userOverrideSettings["background_color"] == 1) {
+      if (inputFeatureSettings["background_color"] == 1) {
         resultSettings.paperColor = "#333333";
       }
-      else if (userOverrideSettings["background_color"] == 2) {
+      else if (inputFeatureSettings["background_color"] == 2) {
         resultSettings.paperColor = "#DDDDDD";
       }
 
-      if (userOverrideSettings["main_color"] != 0) {
-        resultSettings.mainHue = (parseInt(userOverrideSettings["main_color"]) - 1) * 50;
+      if (inputFeatureSettings["main_color"] != 0) {
+        resultSettings.mainHue = (parseInt(inputFeatureSettings["main_color"]) - 1) * 50;
       }
 
-      if (userOverrideSettings["color_type"] == 1)
+      if (inputFeatureSettings["color_type"] == 1)
         resultSettings.colorType = 1;
-      else if (userOverrideSettings["color_type"] == 2)
+      else if (inputFeatureSettings["color_type"] == 2)
         resultSettings.colorType = 4;
-      else if (userOverrideSettings["color_type"] == 3)
+      else if (inputFeatureSettings["color_type"] == 3)
         resultSettings.colorType = 2;
-      else if (userOverrideSettings["color_type"] == 4)
+      else if (inputFeatureSettings["color_type"] == 4)
         resultSettings.colorType = 3;
-      else if (userOverrideSettings["color_type"] == 5)
+      else if (inputFeatureSettings["color_type"] == 5)
         resultSettings.colorType = 5;
 
-      if (userOverrideSettings["triangle_chance"] == 1)
+      if (inputFeatureSettings["triangle_chance"] == 1)
         resultSettings.triangleChance = 0.0;
-      else if (userOverrideSettings["triangle_chance"] == 2)
+      else if (inputFeatureSettings["triangle_chance"] == 2)
         resultSettings.triangleChance = 0.03;
-      else if (userOverrideSettings["triangle_chance"] == 3)
+      else if (inputFeatureSettings["triangle_chance"] == 3)
         resultSettings.triangleChance = 0.12;
-      else if (userOverrideSettings["triangle_chance"] == 4)
+      else if (inputFeatureSettings["triangle_chance"] == 4)
         resultSettings.triangleChance = 0.32;
 
-      if (userOverrideSettings["paper_texture"] == 1) {
+      if (inputFeatureSettings["paper_texture"] == 1) {
         resultSettings.textureEnabled = false;
       }
-      else if (userOverrideSettings["paper_texture"] == 2) {
+      else if (inputFeatureSettings["paper_texture"] == 2) {
         resultSettings.textureEnabled = true;
         overrideSettings.textureDirection = 0;
       }
-      else if (userOverrideSettings["paper_texture"] == 3) {
+      else if (inputFeatureSettings["paper_texture"] == 3) {
         resultSettings.textureEnabled = true;
         overrideSettings.textureDirection = 1;
       }
@@ -288,73 +295,73 @@
     }
 
     function getColorByUserId(userId) {
-            // let hueOrder = [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 240, 255, 270, 285, 300, 315, 330, 345];
-            let hueOrder = [0, 45, 90, 135, 180, 225, 270, 315, 15, 60, 105, 150, 195, 240, 285, 330, 30, 75, 120, 165, 210, 255, 300, 345];
-            let hueValue = hueOrder[userId % 24];
+      // let hueOrder = [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 240, 255, 270, 285, 300, 315, 330, 345];
+      let hueOrder = [0, 45, 90, 135, 180, 225, 270, 315, 15, 60, 105, 150, 195, 240, 285, 330, 30, 75, 120, 165, 210, 255, 300, 345];
+      let hueValue = hueOrder[userId % 24];
 
-            if (userId % 4 == 0) {
-                satValue = 0.3;
-                briValue = 1.0;
-            }
-            else if (userId % 4 == 1) {
-                satValue = 0.8;
-                briValue = 1.0;
-            }
-            else if (userId % 4 == 2) {
-                satValue = 0.3;
-                briValue = 1.0;
-            }
-            else if (userId % 4 == 3) {
-                satValue = 0.8;
-                briValue = 1.0;
-            }
+      if (userId % 4 == 0) {
+        satValue = 0.3;
+        briValue = 1.0;
+      }
+      else if (userId % 4 == 1) {
+        satValue = 0.8;
+        briValue = 1.0;
+      }
+      else if (userId % 4 == 2) {
+        satValue = 0.3;
+        briValue = 1.0;
+      }
+      else if (userId % 4 == 3) {
+        satValue = 0.8;
+        briValue = 1.0;
+      }
 
-            return HsbToHtmlColor(hueValue, satValue, briValue);
-        }
+      return HsbToHtmlColor(hueValue, satValue, briValue);
+    }
 
-        function HsbToHtmlColor(hueValue, satValue, briValue) {
-            let chroma = briValue * satValue;
-            let huePrime = hueValue / 60;
-            let x = chroma * (1 - Math.abs(huePrime % 2 - 1));
-            let m = briValue - chroma;
+    function HsbToHtmlColor(hueValue, satValue, briValue) {
+      let chroma = briValue * satValue;
+      let huePrime = hueValue / 60;
+      let x = chroma * (1 - Math.abs(huePrime % 2 - 1));
+      let m = briValue - chroma;
 
-            if (huePrime < 1) {
-                red = chroma;
-                green = x;
-                blue = 0;
-            }
-            else if (huePrime < 2) {
-                red = x;
-                green = chroma;
-                blue = 0;
-            }
-            else if (huePrime < 3) {
-                red = 0;
-                green = chroma;
-                blue = x;
-            }
-            else if (huePrime < 4) {
-                red = 0;
-                green = x;
-                blue = chroma;
-            }
-            else if (huePrime < 5) {
-                red = x;
-                green = 0;
-                blue = chroma;
-            }
-            else {
-                red = chroma;
-                green = 0;
-                blue = x;
-            }
+      if (huePrime < 1) {
+        red = chroma;
+        green = x;
+        blue = 0;
+      }
+      else if (huePrime < 2) {
+        red = x;
+        green = chroma;
+        blue = 0;
+      }
+      else if (huePrime < 3) {
+        red = 0;
+        green = chroma;
+        blue = x;
+      }
+      else if (huePrime < 4) {
+        red = 0;
+        green = x;
+        blue = chroma;
+      }
+      else if (huePrime < 5) {
+        red = x;
+        green = 0;
+        blue = chroma;
+      }
+      else {
+        red = chroma;
+        green = 0;
+        blue = x;
+      }
 
-            let redPart = Math.round((red + m) * 255);
-            let greenPart = Math.round((green + m) * 255);
-            let bluePart = Math.round((blue + m) * 255);
+      let redPart = Math.round((red + m) * 255);
+      let greenPart = Math.round((green + m) * 255);
+      let bluePart = Math.round((blue + m) * 255);
 
-            return `rgb(${redPart}, ${greenPart}, ${bluePart})`;
-        }
+      return `rgb(${redPart}, ${greenPart}, ${bluePart})`;
+    }
   </script>
 
 </body>
