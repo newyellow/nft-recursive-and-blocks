@@ -54,6 +54,7 @@ let isNoiseTextureReady = false;
 
 // this only happened once
 async function setup() {
+  console.log("=== P5js Setup Ready ===");
   Ready();
 }
 
