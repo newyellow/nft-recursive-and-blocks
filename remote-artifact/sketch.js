@@ -54,6 +54,7 @@ let isNoiseTextureReady = false;
 
 // this only happened once
 async function setup() {
+  console.log("=== P5js Setup Ready ===");
   Ready();
 }
 
@@ -228,7 +229,7 @@ async function NYRect(drawX, drawY, drawWidth, drawHeight, forceSplit = false) {
       }
     }
 
-    await sleep(1);
+    await NYCustomAwaitSleep(1);
   }
 }
 
@@ -366,7 +367,7 @@ async function NYTriangle(drawX, drawY, drawWidth, drawHeight, triangleType) {
       }
     }
 
-    await sleep(1);
+    await NYCustomAwaitSleep(1);
   }
 }
 
@@ -607,6 +608,13 @@ class NYNoiseMap {
 
     return noise(this.mapX, this.mapY);
   }
+}
+
+let awaitCounter = 0;
+
+async function NYCustomAwaitSleep(ms) {
+  if(awaitCounter++ % 2 == 0)
+    await sleep(ms);
 }
 
 function sleep(ms) {
