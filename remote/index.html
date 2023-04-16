@@ -230,10 +230,10 @@
         resultSettings.layoutRatio = 1.7778;
 
       if (inputFeatureSettings["background_color"] == 1) {
-        resultSettings.paperColor = "#333333";
+        resultSettings.isDarkPaper = true;
       }
       else if (inputFeatureSettings["background_color"] == 2) {
-        resultSettings.paperColor = "#DDDDDD";
+        resultSettings.isDarkPaper = false;
       }
 
       if (inputFeatureSettings["main_color"] != 0) {

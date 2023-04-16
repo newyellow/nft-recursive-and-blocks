@@ -39,7 +39,6 @@ let baseLightness = 0.0;
 
 let paperHue = 0.0;
 let paperColor;
-let overridePaperColor = 'none';
 let overrideTextureColor = 'none';
 let paperTextureRandomness = 0.0;
 let paperLightness = 0;
@@ -57,12 +56,30 @@ async function setup() {
 }
 
 function setupCanvasRatio() {
-  paddingH = 30;
 
-  let drawHeight = windowHeight - paddingH * 2;
-  let drawWidth = drawHeight * layoutRatio;
+  let canvasRatio = windowWidth / windowHeight;
 
-  paddingW = (windowWidth - drawWidth) / 2;
+  // base on width
+  if (layoutRatio > canvasRatio) {
+    paddingW = 30;
+
+    let drawWidth = windowWidth - paddingW * 2;
+    let drawHeight = drawWidth / layoutRatio;
+
+    paddingH = (windowHeight - drawHeight) / 2;
+  }
+  // base on height
+  else {
+    paddingH = 30;
+
+    let drawHeight = windowHeight - paddingH * 2;
+    let drawWidth = drawHeight * layoutRatio;
+
+    paddingW = (windowWidth - drawWidth) / 2;
+
+  }
+
+
 }
 
 async function startSetup() {
@@ -100,15 +117,11 @@ async function startSetup() {
   colorMode(HSB);
 
   if (isDarkPaper)
-    paperLightness = 20;
+    paperLightness = 6;
   else
     paperLightness = 90;
 
-
-  if (overridePaperColor == 'none')
-    paperColor = color(paperHue, 0, paperLightness);
-  else
-    paperColor = color(overridePaperColor);
+  paperColor = color(paperHue, 0, paperLightness);
 
   mainCanvas.background(paperColor);
 
@@ -121,7 +134,7 @@ async function startSetup() {
 
   drawFinished = true;
   console.log('drawFinished!');
-  
+
   DrawFinished();
 }
 
@@ -515,7 +528,7 @@ function NYRandomColor() {
     currentSat = 0.0;
     currentBright = fxRandom(0, 100);
   }
-  else if(colorType == 5) // rainbow
+  else if (colorType == 5) // rainbow
   {
     currentHue = baseHue + (rainbowIndexColor++ * 0.3) % 360;
   }

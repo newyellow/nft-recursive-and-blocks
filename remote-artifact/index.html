@@ -177,6 +177,8 @@
       else
         features["Paper Texture"] = "Vertical";
 
+      // random layout ratio
+      layoutRatio = fxrand() * 3.6 + 0.36;
       console.log(features);
       window.$fxhashFeatures = features;
     }
@@ -224,8 +226,8 @@
       canvasDensity = _overrideFeatures.inputDensity;
 
       // Paper Color Override
-      if (_overrideFeatures.paperColor != null)
-        overridePaperColor = _overrideFeatures.paperColor;
+      if (_overrideFeatures.isDarkPaper != null)
+        isDarkPaper = _overrideFeatures.isDarkPaper;
 
       // Layout Override
       if (_overrideFeatures.layout != null) {
