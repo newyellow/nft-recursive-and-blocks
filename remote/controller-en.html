@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>《遞迴與方塊》參數控制</title>
+    <title>"Recursive and Blocks" Trait Controller</title>
     <style>
         html,
         body {
@@ -22,14 +22,14 @@
         }
 
         #description {
-            padding: 10px 30px;
+            padding: 10px 10px;
             margin-bottom: 20px;
             border-radius: 24px;
 
             font-size: 1.2em;
+            text-align: justify;
 
-            letter-spacing: 1px;
-            line-height: 1.6;
+            line-height: 1.4;
         }
 
         .split-line {
@@ -141,7 +141,7 @@
         }
 
         .feature-button {
-            width: 60px;
+            width: 120px;
             height: 60px;
             padding: 6px;
             margin: 6px;
@@ -179,25 +179,25 @@
 
             <!-- Project Explanation -->
             <div id="description">
-                區塊鏈上的生成藝術 NFT，為了能夠有效創造多樣性，通常會設計一些「屬性」（traits），例如顏色、長寬比、線條粗細等，讓作品有一些預先設計好的架構。<br />
+                Generative art on the blockchain usually designs some "traits" so that the work has some pre-designed variation structures, such as color, aspect ratio, line thickness, etc. <br />
                 <br />
-                本作品邀請您使用手機，實際操作屬性的變化，即時體驗作品的生成，感受其魅力！<br />
+                This work invites you to play with the traits and experience the excitement of generating new artworks in real time!
             </div>
 
             <div id="language-switch">
-                <a href="" style="background-color: #FFF; color: #333">中文</a><a href="controller-en.html">EN</a>
+                <a href="controller.html">中文</a><a href="" style="background-color: #FFF; color: #333">EN</a>
             </div>
             <div class="split-line"></div>
 
             <!-- Background Color -->
             <div class="override-feature" id="override-set-background_color">
 
-                <label class="option-label">背景色<span class="current-option">：隨機</span></label>
+                <label class="option-label">Background Color<span class="current-option">：Random</span></label>
 
                 <div class="feature-options">
-                    <div class="feature-button">隨機</div>
-                    <div class="feature-button">深色</div>
-                    <div class="feature-button">淺色</div>
+                    <div class="feature-button">Random</div>
+                    <div class="feature-button">Dark</div>
+                    <div class="feature-button">Light</div>
                 </div>
 
             </div>
@@ -205,13 +205,13 @@
             <!-- Layout -->
             <div class="override-feature" id="override-set-layout">
 
-                <label class="option-label">形狀布局<span class="current-option">：隨機</span></label>
+                <label class="option-label">Layout<span class="current-option">：Random</span></label>
 
                 <div class="feature-options">
-                    <div class="feature-button">隨機</div>
-                    <div class="feature-button">方形</div>
-                    <div class="feature-button">直式</div>
-                    <div class="feature-button">橫式</div>
+                    <div class="feature-button">Random</div>
+                    <div class="feature-button">Square</div>
+                    <div class="feature-button">Portrait</div>
+                    <div class="feature-button">Landscape</div>
                 </div>
 
             </div>
@@ -219,17 +219,17 @@
             <!-- Color Hue -->
             <div class="override-feature" id="override-set-main_color">
 
-                <label class="option-label">主色調<span class="current-option">：隨機</span></label>
+                <label class="option-label">Main Color Hue<span class="current-option">：Random</span></label>
 
                 <div class="feature-options">
-                    <div class="feature-button">隨機</div>
-                    <div class="feature-button">紅</div>
-                    <div class="feature-button">橙</div>
-                    <div class="feature-button">黃</div>
-                    <div class="feature-button">綠</div>
-                    <div class="feature-button">藍</div>
-                    <div class="feature-button">靛</div>
-                    <div class="feature-button">紫</div>
+                    <div class="feature-button">Random</div>
+                    <div class="feature-button">Red</div>
+                    <div class="feature-button">Orange</div>
+                    <div class="feature-button">Yellow</div>
+                    <div class="feature-button">Green</div>
+                    <div class="feature-button">Blue</div>
+                    <div class="feature-button">Indigo</div>
+                    <div class="feature-button">Purple</div>
                 </div>
 
             </div>
@@ -237,15 +237,15 @@
             <!-- Color Type -->
             <div class="override-feature" id="override-set-color_type">
 
-                <label class="option-label">顏色類型<span class="current-option">：隨機</span></label>
+                <label class="option-label">Color Variation Style<span class="current-option">：Random</span></label>
 
                 <div class="feature-options">
-                    <div class="feature-button">隨機</div>
-                    <div class="feature-button">協調色 A</div>
-                    <div class="feature-button">協調色 B</div>
-                    <div class="feature-button">對比色</div>
-                    <div class="feature-button">黑白</div>
-                    <div class="feature-button">彩虹</div>
+                    <div class="feature-button">Random</div>
+                    <div class="feature-button">Coordinated <br />A</div>
+                    <div class="feature-button">Coordinated <br />B</div>
+                    <div class="feature-button">Contrasting</div>
+                    <div class="feature-button">Mono</div>
+                    <div class="feature-button">Rainbow</div>
                 </div>
 
             </div>
@@ -253,14 +253,14 @@
             <!-- Triangle Chance -->
             <div class="override-feature" id="override-set-triangle_chance">
 
-                <label class="option-label">三角形機率<span class="current-option">：隨機</span></label>
+                <label class="option-label">Triangle Chance<span class="current-option">：Random</span></label>
 
                 <div class="feature-options">
-                    <div class="feature-button">隨機</div>
-                    <div class="feature-button">無機率</div>
-                    <div class="feature-button">低機率</div>
-                    <div class="feature-button">中機率</div>
-                    <div class="feature-button">高機率</div>
+                    <div class="feature-button">Random</div>
+                    <div class="feature-button">No Chance</div>
+                    <div class="feature-button">Low</div>
+                    <div class="feature-button">Medium</div>
+                    <div class="feature-button">High</div>
                 </div>
 
             </div>
@@ -280,7 +280,7 @@
             </div>
 
             <div>
-                <button type="button" class="ny-btn mb-3" onclick="SendData()">送出參數</button>
+                <button type="button" class="ny-btn mb-3" onclick="SendData()">Send Trait</button>
             </div>
         </div>
     </div>
@@ -459,7 +459,7 @@
             console.log(jsonData);
             if (jsonData.status == true) {
                 console.log("Send Data OK");
-                alert("您的作品產生中！\n輪到您的作品時，電視周圍會有與您的介面顏色相同的框線");
+                alert("Your work is in queue!\nWhen your work is displaying, it will have a colored border same as your interface border color.");
             }
             else {
                 console.log(`Send Data Fail: ${jsonData.message}`);
