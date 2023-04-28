@@ -21,6 +21,74 @@
 
         }
 
+        #overlay-wrapper {
+            position: fixed;
+            left: 0px;
+            top: 0px;
+            z-index: 10;
+
+            width: 100%;
+            height: 100%;
+
+            background-color: rgba(30, 30, 30, 0.5);
+            display: none;
+
+            align-items: center;
+            justify-content: center;
+        }
+
+        .panel-waiting {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+            box-sizing: border-box;
+
+            border-radius: 24px;
+
+            padding: 30px;
+
+            color: #111;
+            font-size: 1.2em;
+
+            display: none;
+        }
+
+        .panel-waiting img {
+            width: 100px;
+        }
+
+        .panel-result {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+            box-sizing: border-box;
+
+            width: 80%;
+
+            border-radius: 24px;
+
+            padding: 30px;
+
+            color: #111;
+            font-size: 1.2em;
+        }
+
+        .panel-result .button {
+            background-color: #EEE;
+            color: #111;
+            border: 2px solid #111;
+            padding: 10px 30px;
+
+            margin-top: 30px;
+
+            border-radius: 12px;
+
+            font-weight: bold;
+        }
+
         #description {
             padding: 10px 30px;
             margin-bottom: 20px;
@@ -30,6 +98,13 @@
 
             letter-spacing: 1px;
             line-height: 1.6;
+        }
+
+        #instruction {
+            padding: 6px 30px;
+
+            font-size: 1.2em;
+            color: #FEC;
         }
 
         .split-line {
@@ -106,9 +181,20 @@
             color: #FFF;
         }
 
-        .ny-btn {
+        .sendBtn {
+            background-color: white;
+            color: #111;
+            font-size: 1.2em;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            text-align: center;
+            vertical-align: middle;
+
             width: 200px;
-            height: 48px;
+            padding-top: 12px;
+            padding-bottom: 12px;
 
             box-sizing: border-box;
             margin-top: 30px;
@@ -118,9 +204,6 @@
             border-radius: 12px;
 
             border: 2px solid #FFF;
-
-            font-size: 1.2em;
-            font-weight: bold;
         }
 
         .override-feature {
@@ -175,6 +258,25 @@
 
     <div id="settings-panel">
 
+        <!-- Overlay  -->
+        <div id="overlay-wrapper">
+            <div class="panel-waiting">
+                <img src="loading.gif" />
+
+                <div class="desc">參數傳送中，請稍候 ...</div>
+            </div>
+
+            <div class="panel-result">
+                <div class="desc">
+                    hello 123
+                </div>
+
+                <div class="button" onclick="CloseNotification()">
+                    確認
+                </div>
+            </div>
+        </div>
+
         <div id="override-settings">
 
             <!-- Project Explanation -->
@@ -187,6 +289,10 @@
             <div id="language-switch">
                 <a href="" style="background-color: #FFF; color: #333">中文</a><a href="controller-en.html">EN</a>
             </div>
+            <div class="split-line"></div>
+
+            <div id="instruction">請在選擇完屬性後，按最下方的「送出參數」按鈕</div>
+
             <div class="split-line"></div>
 
             <!-- Background Color -->
@@ -280,7 +386,7 @@
             </div>
 
             <div>
-                <button type="button" class="ny-btn mb-3" onclick="SendData()">送出參數</button>
+                <div class="sendBtn" onclick="SendData()">送出參數</div>
             </div>
         </div>
     </div>
@@ -424,6 +530,14 @@
         }
 
         async function SendData() {
+
+            // enable loading
+            $('#overlay-wrapper').css('display', 'flex');
+            $('#overlay-wrapper .panel-waiting').css('display', 'flex');
+            $('#overlay-wrapper .panel-result').css('display', 'none');
+
+            await sleep(100);
+
             let url = API_URL;
 
             let settingData = {
@@ -458,14 +572,22 @@
             let jsonData = await result.json();
             console.log(jsonData);
             if (jsonData.status == true) {
-                console.log("Send Data OK");
-                alert("您的作品產生中！\n輪到您的作品時，電視周圍會有與您的介面顏色相同的框線");
+                $('#overlay-wrapper .panel-waiting').css('display', 'none');
+                $('#overlay-wrapper .panel-result').css('display', 'flex');
+                $('.panel-result .desc').html("傳送完成，您的作品即將生成！\<br \/\>\<br \/\>播放您的作品時，螢幕會有與您的介面顏色相同的框線");
             }
             else {
-                console.log(`Send Data Fail: ${jsonData.message}`);
-                alert(`Send Data Fail: ${jsonData.message}`);
+                $('#overlay-wrapper .panel-waiting').css('display', 'none');
+                $('#overlay-wrapper .panel-result').css('display', 'flex');
+                $('.panel-result .desc').html("發生錯誤，請重試一次");
             }
 
+        }
+
+        function CloseNotification() {
+            $('#overlay-wrapper').css('display', 'none');
+            $('#overlay-wrapper .panel-waiting').css('display', 'none');
+            $('#overlay-wrapper .panel-result').css('display', 'none');
         }
 
         $(window).on('keydown', function (e) {
@@ -474,6 +596,10 @@
                 console.log('item removed');
             }
         });
+
+        async function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
 
         function getColorByUserId(userId) {
             // let hueOrder = [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 240, 255, 270, 285, 300, 315, 330, 345];
